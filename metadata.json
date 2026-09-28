@@ -1,0 +1,6 @@
+{
+  "name": "Jaza Kikapu - Digital Marketplace for Voi & Taita-Taveta",
+  "description": "Discover local businesses, watch sellers live, shop from multiple stalls into one Kikapu, and get fast rider delivery across Voi and Taita-Taveta County.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
