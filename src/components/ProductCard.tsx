@@ -1,111 +1,96 @@
 import React from 'react';
-import { Product } from '../types';
-import { useMarket } from '../context/MarketContext';
-import { Eye, Plus, Check } from 'lucide-react';
+import { ShoppingBag, Star } from 'lucide-react';
+import { Product } from '../types/marketplace';
+import { useMarketplace } from '../context/MarketplaceContext';
+import { SmartImage } from './SmartImage';
 
 interface ProductCardProps {
   product: Product;
-  onShowMe?: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onShowMe }) => {
-  const { addToKikapu, kikapu, setSelectedProductForShowMe } = useMarket();
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { navigate, addToKikapu } = useMarketplace();
 
-  const inKikapu = kikapu.find(item => item.product.id === product.id);
+  const discountPercent =
+    product.compareAtPrice && product.compareAtPrice > product.price
+      ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+      : null;
 
   return (
-    <div className="group bg-white rounded-2xl border border-[#E6E0D4] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-      {/* Product Image Area (Takes 65% of height) */}
-      <div className="relative aspect-4/3 w-full overflow-hidden bg-stone-100">
-        <img
-          src={product.image}
+    <div className="group bg-white rounded-xl border border-stone-200/80 overflow-hidden flex flex-col transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-md">
+      {/* 4:3 Imagery Container (65%-75% of visual weight) */}
+      <div
+        onClick={() => navigate('product-detail', { productId: product.id })}
+        className="relative aspect-4/3 w-full bg-[#F5F4F0] overflow-hidden cursor-pointer"
+      >
+        <SmartImage
+          src={product.images[0]}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          referrerPolicy="no-referrer"
+          fallbackLabel={product.name}
+          className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-200"
         />
-
-        {/* Local / Stock Indicators */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
-          {product.isTaitaLocal && (
-            <span className="px-2 py-0.5 rounded-md bg-[#1B4332] text-white text-[10px] font-bold tracking-tight">
-              Taita-Taveta Local
-            </span>
-          )}
-          {product.stockQuantity < 5 && (
-            <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-bold">
-              Only {product.stockQuantity} left
-            </span>
-          )}
-        </div>
-
-        {/* "Show Me" Quick Trigger */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onShowMe) {
-              onShowMe(product);
-            } else {
-              setSelectedProductForShowMe(product);
-            }
-          }}
-          className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-black/60 hover:bg-black text-white text-[11px] font-medium backdrop-blur-md transition-colors cursor-pointer"
-          title="Ask seller to show this product live/photo"
-        >
-          <Eye className="w-3.5 h-3.5 text-[#F4A261]" />
-          <span>Show Me</span>
-        </button>
+        {discountPercent && (
+          <div className="absolute top-3 left-3 bg-stone-900/85 backdrop-blur-xs text-white px-2.5 py-1 rounded text-xs font-mono-tabular font-medium">
+            Save {discountPercent}%
+          </div>
+        )}
       </div>
 
-      {/* Product Details */}
-      <div className="p-4 flex-1 flex flex-col justify-between">
+      {/* Contiguous Card Content — Zero Static Pill Spam */}
+      <div className="p-4 flex-1 flex flex-col justify-between gap-3">
         <div>
-          {/* Stall Name */}
-          <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-1 truncate">
-            {product.storeName}
+          {/* Unboxed Metadata with typographic separators */}
+          <div className="flex items-center gap-1.5 text-xs text-stone-500 mb-1 truncate">
+            <button
+              type="button"
+              onClick={() => navigate('store-detail', { storeSlug: product.storeSlug })}
+              className="hover:text-emerald-900 hover:underline font-medium text-stone-600 truncate cursor-pointer"
+            >
+              {product.storeName}
+            </button>
+            <span aria-hidden="true">·</span>
+            <span className="shrink-0">{product.location}</span>
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex items-center gap-0.5 shrink-0 text-stone-600">
+              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+              <span className="font-mono-tabular">{product.rating.toFixed(1)}</span>
+            </span>
           </div>
 
-          {/* Product Name */}
-          <h4 className="font-semibold text-stone-900 text-sm sm:text-base line-clamp-2 mb-2 leading-snug">
+          {/* Product Title */}
+          <h3
+            onClick={() => navigate('product-detail', { productId: product.id })}
+            className="text-base font-semibold text-stone-900 group-hover:text-emerald-900 transition-colors line-clamp-2 cursor-pointer leading-snug"
+          >
             {product.name}
-          </h4>
+          </h3>
 
-          {/* Price & Unit */}
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-base sm:text-lg font-bold text-stone-900 tabular-nums">
-              KES {product.price.toLocaleString()}
-            </span>
-            {product.compareAtPrice && (
-              <span className="text-xs text-stone-400 line-through tabular-nums">
-                KES {product.compareAtPrice.toLocaleString()}
-              </span>
-            )}
-            <span className="text-xs text-stone-500 font-normal">
-              / {product.unit}
-            </span>
-          </div>
+          <p className="text-xs text-stone-500 mt-1">
+            {product.unit} · {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+          </p>
         </div>
 
-        {/* Add to Kikapu Button */}
-        <div className="pt-2 border-t border-stone-100 flex items-center gap-2">
-          <button
-            onClick={() => addToKikapu(product, 1)}
-            className={`w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              inKikapu
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
-                : 'bg-[#1B4332] text-white hover:bg-[#143225] shadow-sm'
-            }`}
-          >
-            {inKikapu ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                <span>In Kikapu ({inKikapu.quantity})</span>
-              </>
-            ) : (
-              <>
-                <Plus className="w-3.5 h-3.5 text-[#F4A261]" />
-                <span>Add to Kikapu</span>
-              </>
+        {/* Price & Direct Add to Kikapu Action */}
+        <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-2">
+          <div>
+            <div className="font-mono-tabular text-[15px] font-semibold text-stone-950">
+              KSh {product.price.toLocaleString()}
+            </div>
+            {product.compareAtPrice && product.compareAtPrice > product.price && (
+              <div className="font-mono-tabular text-xs text-stone-400 line-through">
+                KSh {product.compareAtPrice.toLocaleString()}
+              </div>
             )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => addToKikapu(product, 1)}
+            disabled={product.stock <= 0}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-900 text-white hover:bg-emerald-800 disabled:bg-stone-200 disabled:text-stone-400 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
+            <span>Add to Kikapu</span>
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 {
-  "name": "Jaza Kikapu - Digital Marketplace for Voi & Taita-Taveta",
-  "description": "Discover local businesses, watch sellers live, shop from multiple stalls into one Kikapu, and get fast rider delivery across Voi and Taita-Taveta County.",
+  "name": "Jaza Kikapu — Taita-Taveta Digital Marketplace",
+  "description": "Your market. Your sellers. Your basket. Digital marketplace for Voi, Wundanyi, Mwatate, and Taveta with digital stores, Jaza Live shopping, multi-seller Kikapu basket, M-Pesa payments, and Jaza Riders delivery.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
